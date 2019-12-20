@@ -28,11 +28,12 @@ def generate_observations(N, D, n_classes):
     for c in range(1, n_classes):
         A = np.random.rand(D,D)
         covariance = np.dot(A,A.transpose())  # Make it sim, positive definite
-        observations_c = np.random.multivariate_normal(np.zeros(D) + c, covariance, N_class)
+        observations_c = np.random.multivariate_normal(np.zeros(D) + c*2, covariance, N_class)
         observations = np.concatenate((observations, observations_c), axis = 0)
         labels = np.concatenate((labels, np.zeros((observations_c.shape[0], 1)) + c), axis = 0)
 
-    return observations, labels
+    perm = np.random.permutation(observations.shape[0])
+    return observations[perm], labels[perm]
 
 if __name__ == "__main__":
     N = 300  # Number of observations
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     q = 2  # X dimension (latent)
     
     observations, labels = generate_observations(N, D, n_classes)
-    # TODO(oleguer): Reduce dimentions to 2D
+    # TODO(oleguer): Reduce dimensions to 2D
     # d = 25  # Size of active set
     # T = 10  # Number of iterations
     # ...
