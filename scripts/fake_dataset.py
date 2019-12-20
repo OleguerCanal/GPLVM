@@ -3,11 +3,14 @@ from matplotlib import pyplot as plt
 
 np.seed = 0
 
-def plot(data, labels):
+def plot(data, labels = None):
     '''Simple scatter of 2d data in same figure
     '''
     fig, ax = plt.subplots()
-    ax.scatter(data[:, 0], data[:, 1], c=labels.flatten())
+    if labels:
+        ax.scatter(data[:, 0], data[:, 1], c=labels.flatten())
+    else:
+        ax.scatter(data[:, 0], data[:, 1])
     ax.grid()
     # fig.savefig("test.png")
     plt.show()
