@@ -31,7 +31,7 @@ def active_set_likelihood(params, *args):
     Yi, YiYiT = args
     Kii = kernel(Yi, Yi, alpha=params[0], beta=params[1], gamma=params[2])
     neg_loglike = 0.5*np.sum(inner1d(Kii.I, YiYiT)) +\
-                 np.log(np.linalg.det(Kii))/2.
+                 np.log(np.abs(np.linalg.det(Kii)))/2.
                 # + np.log(2*np.pi)*Yi.shape[1]/2. # OBS: Does not change optimization
     return neg_loglike
 
@@ -44,9 +44,7 @@ def latent_var_prob(xj, *args):
     sigma_sq_j -= sigma_second_term.item()
     cov = sigma_sq_j*np.eye(f_j.shape[0])
     # f_j = np.array(f_j[:, 0].flatten())[0]
-    cosa = multivariate_normal(list(f_j), cov)
-    cosa2 = cosa.pdf(y_j)
-    return cosa2
+    return -multivariate_normal(list(f_j), cov).logpdf(y_j)
 
 
 def gplvm(Y, active_set_size, iterations, latent_dimension=2):
@@ -68,6 +66,7 @@ def gplvm(Y, active_set_size, iterations, latent_dimension=2):
         alpha = kernel_params[0]
         beta = kernel_params[1]
         gamma = kernel_params[2]
+        print(kernel_params)
 
         # Select a new active set
         active_set, inactive_set = fake_ivm(Y, active_set_size)
@@ -84,21 +83,21 @@ def gplvm(Y, active_set_size, iterations, latent_dimension=2):
             f_j = np.array(f_j[:, 0].flatten())[0]
             sigma_second_term = k_j.T*Kii_inv*k_j
             args = tuple((y_j, f_j, sigma_second_term, alpha, beta, gamma))
-            X[j, :] = fmin_cg(latent_var_prob, X[j, :], args=args)
+            X[j, :] = fmin_cg(latent_var_prob, X[j, :], args=args, disp=True)
     return X
 
 
 if __name__ == "__main__":
     N = 100  # Number of observations
     n_classes = 3  # Number of classes
-    D = 5  # Y dimension (observations)
+    D = 4  # Y dimension (observations)
 
     observations, labels = generate_observations(N, D, n_classes)
     # x = StandardScaler().fit_transform(x)  # Standardize??
 
     gp_vals = gplvm(Y=observations,
                      active_set_size=20,
-                     iterations=3)
+                     iterations=10)
     pca = PCA(n_components=2).fit_transform(observations)
 
 
