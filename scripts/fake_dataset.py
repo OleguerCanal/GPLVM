@@ -3,15 +3,18 @@ from matplotlib import pyplot as plt
 
 np.seed = 0
 
-def plot(data, labels = None):
+def plot(pca, gp_vals, labels = None):
     '''Simple scatter of 2d data in same figure
     '''
-    fig, ax = plt.subplots()
-    if labels:
-        ax.scatter(data[:, 0], data[:, 1], c=labels.flatten())
+    fig, ax = plt.subplots(2)
+    if labels is not None:
+        ax[0].scatter(pca[:, 0], pca[:, 1], c=labels.flatten())
+        ax[1].scatter(gp_vals[:, 0], gp_vals[:, 1], c=labels.flatten())
     else:
-        ax.scatter(data[:, 0], data[:, 1])
-    ax.grid()
+        ax[0].scatter(pca[:, 0], pca[:, 1])
+        ax[1].scatter(gp_vals[:, 0], gp_vals[:, 1])
+    ax[0].grid()
+    ax[1].grid()
     # fig.savefig("test.png")
     plt.show()
 
