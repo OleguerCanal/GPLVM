@@ -19,20 +19,21 @@ def fake_ivm(data, size):
 
 
 def kernel(X, Y, alpha, beta, gamma):
-    kernel = np.matrix(kernels.RBF(length_scale=(1./gamma**2)))
-    return alpha*kernel(X, Y) + np.eye(X.shape[0])/beta
+    kernel = kernels.RBF(length_scale=(1./gamma**2))
+    return np.matrix(alpha*kernel(X, Y) + np.eye(X.shape[0])/beta)
 
 
-def active_set_likelihood(params, args):
+def active_set_likelihood(params, *args):
     ''' Kernel Optimization: Equation (4) of the paper
     '''
-    print(args)
-    Yi = args
-    print(Yi.shape)
+    Yi = args[0]
     Kii = kernel(Yi, Yi, alpha=params[0], beta=params[1], gamma=params[2])
-    print(Kii.shape)
-    return np.exp(-0.5*Yi.T*Kii.I*Yi) /\
-        (((2*np.pi)**(Yi.shape[1]/2.))*np.linalg.det(Kii)**0.5)
+    # like = np.exp(-0.5*Yi.T*Kii.I*Yi) /\
+    #     (((2*np.pi)**(Yi.shape[1]/2.))*np.linalg.det(Kii)**0.5)
+    like = -0.5*Yi.T*Kii.I*Yi
+    print(like.shape)
+    like -= np.log(((2*np.pi)**(Yi.shape[1]/2.))*np.linalg.det(Kii)**0.5)
+    return like
 
 
 def latent_var_prob(xj, *args):
@@ -57,7 +58,7 @@ def gplvm(Y, active_set_size, iterations, latent_dimension=2):
         # Optimise (4) wrt the parameters of K using SCG
         kernel_params_0 = np.ones(3)  # (alpha, beta, gamma)
         optimal_kernel_params = fmin_cg(
-            active_set_likelihood, kernel_params_0, args=Yi)
+            f = active_set_likelihood, x0 = kernel_params_0, args=tuple((Yi,)))
         alpha = optimal_kernel_params[0]
         beta = optimal_kernel_params[1]
         gamma = optimal_kernel_params[2]
@@ -76,7 +77,7 @@ def gplvm(Y, active_set_size, iterations, latent_dimension=2):
             k_j = Kii[:, j]
             f_j = YT_Kii_inv*k_j
             sigma_second_term = k_j.T*Kii_inv*k_j
-            args = tuple(y_j, f_j, sigma_second_term, alpha, beta, gamma)
+            args = tuple((y_j, f_j, sigma_second_term, alpha, beta, gamma))
             X[j, :] = fmin_cg(latent_var_prob, X[j, :], args=args)
     return X
 
