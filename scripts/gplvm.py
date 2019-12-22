@@ -24,6 +24,8 @@ def kernel(X, Y, alpha, beta, gamma):
     kernel = kernels.RBF(length_scale=(1./gamma**2))
     return np.matrix(alpha*kernel(X, Y) + np.eye(X.shape[0])/beta)
 
+def kernel_test(x, y, alpha, beta, gamma):
+    return alpha*np.exp(-gamma*np.dot(x-y, x-y)/2) + 1./beta
 
 def active_set_likelihood(params, *args):
     ''' Kernel Optimization: Equation (4) of the paper
@@ -39,10 +41,14 @@ def active_set_likelihood(params, *args):
 def latent_var_prob(xj, *args):
     ''' Latent Var Optimization: Equation (3) of the paper
     '''
+    print(np.mat(xj))
     y_j, f_j, sigma_second_term, alpha, beta, gamma = args
     sigma_sq_j = kernel(np.mat(xj), np.mat(xj), alpha, beta, gamma).item()
+    print(sigma_sq_j)
+    print(kernel_test(xj, xj, alpha, beta, gamma))
     sigma_sq_j -= sigma_second_term.item()
     cov = sigma_sq_j*np.eye(f_j.shape[0])
+    # print(sigma_sq_j)
     # f_j = np.array(f_j[:, 0].flatten())[0]
     return -multivariate_normal(list(f_j), cov).logpdf(y_j)
 
@@ -83,7 +89,8 @@ def gplvm(Y, active_set_size, iterations, latent_dimension=2):
             f_j = np.array(f_j[:, 0].flatten())[0]
             sigma_second_term = k_j.T*Kii_inv*k_j
             args = tuple((y_j, f_j, sigma_second_term, alpha, beta, gamma))
-            X[j, :] = fmin_cg(latent_var_prob, X[j, :], args=args, disp=True)
+            X[j, :] = fmin_cg(latent_var_prob, X[j, :], args=args, epsilon = 0.1, disp=True)
+            quit()
     return X
 
 
