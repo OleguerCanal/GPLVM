@@ -55,14 +55,14 @@ def latent_var_prob(xj, *args):
     sigma_sq_j = k_x_x - (k_j.T*Kii_inv*k_j).item()
     cov = sigma_sq_j*np.eye(Yi.shape[1])
     
-    # print(sigma_sq_j)
-    # f_j = np.array(f_j[:, 0].flatten())[0]
     return -multivariate_normal(list(f_j), cov).logpdf(y_j)
 
 
 def gplvm(Y, active_set_size, iterations, latent_dimension=2):
     ''' Implementation of GPLVM algorithm, returns data in latent space
     '''
+    # TODO(oleguer): SGould we center observations?
+    
     # Initialize X through PCA
     X = PCA(n_components=latent_dimension).fit_transform(Y)
     kernel_params = np.ones(3)  # (alpha, beta, gamma) TODO(oleguer): Should we rewrite those at each iteration? I dont thinkn so
@@ -106,11 +106,8 @@ if __name__ == "__main__":
     # x = StandardScaler().fit_transform(x)  # Standardize??
 
     gp_vals = gplvm(Y=observations,
-                     active_set_size=20,
-                     iterations=10)
+                     active_set_size=50,
+                     iterations=30)
     pca = PCA(n_components=2).fit_transform(observations)
 
-    print("ok")
-
     plot(pca, gp_vals, labels)
-    print("ok")
