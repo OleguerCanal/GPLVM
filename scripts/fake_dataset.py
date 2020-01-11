@@ -37,7 +37,7 @@ def generate_observations(N, D, n_classes):
         A = np.random.rand(D, D)
         covariance = np.dot(A, A.transpose())  # Make it sim, positive definite
         observations_c = np.random.multivariate_normal(
-            np.zeros(D) + c*5, covariance, N_class)
+            np.zeros(D) + c*2, covariance, N_class)
         observations = np.concatenate((observations, observations_c), axis=0)
         labels = np.concatenate(
             (labels, np.zeros((observations_c.shape[0], 1)) + c), axis=0)
