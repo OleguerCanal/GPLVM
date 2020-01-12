@@ -53,8 +53,4 @@ if __name__ == "__main__":
     q = 2  # X dimension (latent)
 
     observations, labels = generate_observations(N, D, n_classes)
-    # TODO(oleguer): Reduce dimensions to 2D
-    # d = 25  # Size of active set
-    # T = 10  # Number of iterations
-    # ...
     plot(observations, labels)
