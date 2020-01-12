@@ -10,7 +10,7 @@ import time
 from tqdm import tqdm
 from fake_dataset import generate_observations, plot
 
-np.seed = 0
+np.random.seed(0)
 
 def fake_ivm(data, size):
     ''' Returns random partition of data
@@ -108,6 +108,7 @@ if __name__ == "__main__":
     gp_vals = gplvm(Y=observations,
                      active_set_size=50,
                      iterations=30)
+
     pca = PCA(n_components=2).fit_transform(observations)
 
     plot(pca, gp_vals, labels)

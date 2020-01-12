@@ -32,6 +32,8 @@ def likelihood(var, *args):
     trace = np.sum(inner1d(K.I, YYT))
     return D*np.log(np.abs(np.linalg.det(K)))/2 + trace/2
 
+def save_vars(var):
+    np.save("data/var.npy", var)
 
 def simple_gplvm(Y, latent_dimension=2):
     ''' Implementation of GPLVM algorithm, returns data in latent space
@@ -52,12 +54,12 @@ def simple_gplvm(Y, latent_dimension=2):
 
     # Optimization
     t1 = time.time()
-    var = fmin_cg(likelihood, var, args=tuple((YYT,N,D,)), epsilon = 0.001, disp=True)
+    var = fmin_cg(likelihood, var, args=tuple((YYT,N,D,)), epsilon = 0.001, disp=True, callback=save_vars)
     print("time:", time.time() - t1)
 
     var = list(var)
 
-    np.save("var.npy", var)
+    np.save("data/final_var.npy", var)
 
     N = Y.shape[0]
     X = np.array(var[:-3]).reshape((N, 2))
@@ -80,7 +82,9 @@ if __name__ == "__main__":
     observations, labels = generate_observations(N, D, n_classes)
     # x = StandardScaler().fit_transform(x)  # Standardize??
 
-    gp_vals = simple_gplvm(Y=observations)
+    gp_vals = simple_gplvm(Y=observations)  # Compute values
+    # gp_vals = np.array(list(np.load("data/var.npy"))[:-3]).reshape((N, 2))  # Load from memory
+
     pca = PCA(n_components=2).fit_transform(observations)
 
     print("distance:", np.linalg.norm(gp_vals-pca))
