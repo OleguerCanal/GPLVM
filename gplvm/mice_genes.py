@@ -10,8 +10,9 @@ import pandas as pd
 from simple_gplvm import simple_gplvm
 
 def load_genes_dataset(N, D):
-    URL = "https://raw.githubusercontent.com/sods/ods/master/datasets/guo_qpcr.csv"
-    df = pd.read_csv(URL, index_col=0)
+    # URL = "https://raw.githubusercontent.com/sods/ods/master/datasets/guo_qpcr.csv"
+    # df = pd.read_csv(URL, index_col=0)
+    df = pd.read_csv("data/mice.csv", index_col=0)
     df = df.sample(n = N, axis = 0, random_state = 1)
     df = df.sample(n = D, axis=1, random_state = 1)
     print(df.head())
@@ -39,15 +40,15 @@ def plot(pca, gp_vals, labels=None):
     ax[1].grid()
     ax[1].set_title("GPLVM Single-Cell qPCR data")
     fig.legend(np.unique(labels))
-    fig.savefig("comparison_pca_gp.png")
+    fig.savefig("results/mice_comparison_pca_gp.png")
     plt.show()
 
 if __name__ == "__main__":
-    N, n_classes, D, observations, labels = load_genes_dataset(10, 10)
+    N, n_classes, D, observations, labels = load_genes_dataset(30, 10)
     print("N:", N)
     print("n_classes:", n_classes)
     print("D:", D)
     pca = PCA(n_components=2).fit_transform(observations)
     gp_simple = simple_gplvm(Y=observations, experiment_name="mice")
-    # print(pca.shape)
+    print(pca.shape)
     plot(pca, gp_simple, labels)
