@@ -5,7 +5,7 @@ from sklearn.decomposition import PCA, KernelPCA  # For X initialization
 import pandas as pd
 from simple_gplvm import simple_gplvm
 from fast_gplvm import GPLVM
-
+import time
 
 def load_oil_dataset(samples):
     path = 'data/oil.txt'
@@ -30,7 +30,7 @@ def load_oil_dataset(samples):
 def z(x,y):
     return x**2 + y**2
 
-def plot(pca, gp_vals, labels=None):
+def plot(pca, gp_vals, labels=None, name=""):
     ''' Simple scatter of 2d data in same figure
     '''
     fig, ax = plt.subplots(nrows=1, ncols=2,figsize=(8,6),sharex=True, sharey=True) 
@@ -45,30 +45,27 @@ def plot(pca, gp_vals, labels=None):
         ax[0].scatter(pca[:, 0], pca[:, 1])
         ax[1].scatter(gp_vals[:, 0], gp_vals[:, 1])
     ax[0].grid()
-    ax[0].set_title("PCA Single-Cell qPCR data")
+    ax[0].set_title("PCA oil data")
     ax[1].grid()
-    ax[1].set_title("GPLVM Single-Cell qPCR data")
+    ax[1].set_title("GPLVM oil data")
     xmin, xmax, ymin, ymax = plt.axis()
     x= np.linspace(xmin,xmax,1000)
     y = np.linspace(ymin,ymax,1000)
     X, Y = np.meshgrid(x, y)
     Z = z(X, Y)
-    ax[0].contourf(X,Y,Z,300, cmap='Greys', zorder=0)
+    # ax[0].contourf(X,Y,Z,300, cmap='Greys', zorder=0)
     fig.legend(np.unique(labels))
-    fig.savefig("comparison_pca_gp.png")
+    fig.savefig("figures/oil/" + name + "_result_" + str(time.time()) + ".png")
     # plt.show()
 
 if __name__ == "__main__":
-    N, n_classes, D, observations, labels = load_oil_dataset(samples=20)
+    N, n_classes, D, observations, labels = load_oil_dataset(samples=200)
 
-    gplvm = GPLVM(active_set_size=10, name="oil_exp")
-    gp_vals = gplvm.fit_transform(observations, iterations=5, save=True)
 
-    # N, n_classes, D, observations, labels= load_genes_dataset()
-    # a = np.linspace(0,999,2000, dtype=np.int16)
-    pca = PCA(n_components=2).fit_transform(observations)
-    # gp_simple = simple_gplvm(Y=observations[a,:])
-    # print(pca.shape)
-    # plot_genes(pca, observations[a,0:10], labels[a])
-    # plot_genes(gp_simple, observations[a,0:10], labels[a])
-    plot(pca, gp_vals, labels[a])
+    for active_set_size in [20, 50, 100]:
+        name = "oil_size_" + str(active_set_size) + "_exp"
+        gplvm = GPLVM(active_set_size=active_set_size, name=name)
+        gp_vals = gplvm.fit_transform(observations, iterations=300, save=True)
+        pca = PCA(n_components=2).fit_transform(observations)
+
+        plot(pca, gp_vals, labels, name=name)
