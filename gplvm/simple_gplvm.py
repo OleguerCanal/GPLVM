@@ -38,7 +38,7 @@ def simple_gplvm(Y, experiment_name="experiment", latent_dimension=2):
     global name
     name = experiment_name
     Y = np.matrix(Y)
-    # TODO(oleguer): SGould we center observations?
+    # TODO(oleguer): Should we center observations?
     
     # Initialize X through PCA
  
@@ -53,7 +53,7 @@ def simple_gplvm(Y, experiment_name="experiment", latent_dimension=2):
 
     # Optimization
     t1 = time.time()
-    var = fmin_cg(likelihood, var, args=tuple((YYT,N,D,)), epsilon = 0.001, disp=True, callback=save_vars)
+    var = fmin_cg(likelihood, var, args=tuple((YYT,N,D,latent_dimension,)), epsilon = 0.001, disp=True, callback=save_vars)
     print("time:", time.time() - t1)
 
     var = list(var)
