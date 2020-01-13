@@ -150,7 +150,7 @@ class GPLVM:
         return self.X
 
 if __name__ == "__main__":
-    N, n_classes, D, observations, labels = load_genes_dataset(100, 30)
+    N, n_classes, D, observations, labels = load_genes_dataset(200, 30)
     print("N", N)
     print("D", D)
     print("n_classes", n_classes)

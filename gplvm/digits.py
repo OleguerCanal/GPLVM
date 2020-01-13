@@ -7,6 +7,7 @@ from matplotlib.image import BboxImage
 from matplotlib.transforms import Bbox, TransformedBbox
 import time
 from simple_gplvm import simple_gplvm
+from fast_gplvm import GPLVM
 
 np.random.seed(1)
 
@@ -26,7 +27,7 @@ def load_digit_dataset(samples):
 
     return N, n_classes, D, Y[idx, :], np.asarray(y_tr)[idx].reshape(-1,1)
 
-def plot_digits(pca, dig_obs, labels=None):
+def plot_digits(pca, dig_obs, labels=None, name = ""):
     fig, ax = plt.subplots(nrows=1, ncols=1)
     colors = ["blue","red","green","black","yellow","pink","purple","orange","brown", "grey"]
 
@@ -65,14 +66,15 @@ def plot_digits(pca, dig_obs, labels=None):
         ax[0].scatter(pca[:, 0], pca[:, 1])
         ax[1].scatter(gp_vals[:, 0], gp_vals[:, 1])
     ax.grid()
-    plt.savefig("figures/digits/result_" + str(time.time()) + ".png")
+    plt.savefig("figures/digits/" + name + "_result_" + str(time.time()) + ".png")
     plt.show()
 
 if __name__ == "__main__":
-
-    N, n_classes, D, dig_obs, dig_lab = load_digit_dataset(samples=200)
+    N, n_classes, D, dig_obs, dig_lab = load_digit_dataset(samples=300)
 
     pca_dig = PCA(n_components=2).fit_transform(dig_obs)
-    gp_vals = simple_gplvm(Y=dig_obs, experiment_name="digits_200")  # Compute values
+    gp_vals = GPLVM(active_set_size = 30).fit_transform(dig_obs, iterations = 5)
+    # gp_vals = simple_gplvm(Y=dig_obs, experiment_name="digits_200")  # Compute values
 
-    plot_digits(gp_vals, dig_obs, dig_lab)
+    plot_digits(pca_dig, dig_obs, dig_lab, name = "pca")
+    plot_digits(gp_vals, dig_obs, dig_lab, name = "gplvm")
