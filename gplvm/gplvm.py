@@ -28,15 +28,23 @@ def kernel(X, Y, alpha, beta, gamma):
 def kernel_test(x, y, alpha, beta, gamma):
     return alpha*np.exp(-gamma*np.dot(x-y, x-y)/2) + 1./beta
 
-def active_set_likelihood(params, *args):
+def kernel_param_loglike(params, *args):
     ''' Kernel Optimization: Equation (4) of the paper
     '''
     Xi, YiYiT = args
     Kii = kernel(Xi, Xi, alpha=params[0], beta=params[1], gamma=params[2])
-    neg_loglike = 0.5*np.sum(inner1d(Kii.I, YiYiT)) +\
-                 np.log(np.abs(np.linalg.det(Kii)))/2.
-                # + np.log(2*np.pi)*Yi.shape[1]/2. # OBS: Does not change optimization
+    neg_loglike = 0.5*np.sum(inner1d(Kii.I, YiYiT)) + np.log(np.abs(np.linalg.det(Kii)))/2.
     return neg_loglike
+
+# def kernel_param_loglike(params, *args):
+#     ''' Kernel Optimization: Equation (4) of the paper
+#     '''
+#     Xi, YiYiT = args
+#     Kii = kernel(Xi, Xi, alpha=params[0], beta=params[1], gamma=params[2])
+#     neg_loglike = 0.5*np.sum(inner1d(Kii.I, YiYiT)) +\
+#                  np.log(np.abs(np.linalg.det(Kii)))/2.
+#                 # + np.log(2*np.pi)*Yi.shape[1]/2. # OBS: Does not change optimization
+#     return neg_loglike
 
 
 def latent_var_prob(xj, *args):
@@ -105,10 +113,20 @@ if __name__ == "__main__":
     observations, labels = generate_observations(N, D, n_classes)
     # x = StandardScaler().fit_transform(x)  # Standardize??
 
-    gp_vals = gplvm(Y=observations,
-                     active_set_size=50,
-                     iterations=30)
+    t = time.time()
+    for i in range(10):
+        Kii = kernel(observations, observations, alpha=1, beta=1, gamma=1)
+    print("Time:", time.time() - t)
 
-    pca = PCA(n_components=2).fit_transform(observations)
+    t = time.time()
+    for i in range(10):
+        Kii = kernel_test(observations, observations, alpha=1, beta=1, gamma=1)
+    print("Time:", time.time() - t)
 
-    plot(pca, gp_vals, labels)
+    # gp_vals = gplvm(Y=observations,
+    #                  active_set_size=50,
+    #                  iterations=30)
+
+    # pca = PCA(n_components=2).fit_transform(observations)
+
+    # plot(pca, gp_vals, labels)

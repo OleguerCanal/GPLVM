@@ -10,21 +10,16 @@ import time
 from tqdm import tqdm
 from fake_dataset import generate_observations, plot
 
-np.random.seed(0)
-
 name = "experiemnt"
 
 def kernel(X, Y, alpha, beta, gamma):
     kernel = kernels.RBF(length_scale=(1./gamma**2))
     return np.matrix(alpha*kernel(X, Y) + np.eye(X.shape[0])/(beta**2))
 
-# def kernel_test(x, y, alpha, beta, gamma):
-#     return alpha*np.exp(-gamma*np.dot(x-y, x-y)/2) + 1./beta
-
 def likelihood(var, *args):
-    YYT, N, D, = args
+    YYT, N, D, latent_dimension, = args
 
-    X = np.array(var[:-3]).reshape((N, 2))
+    X = np.array(var[:-3]).reshape((N, latent_dimension))
     alpha = var[-3]
     beta = var[-2]
     gamma = var[-1]
@@ -66,7 +61,7 @@ def simple_gplvm(Y, experiment_name="experiment", latent_dimension=2):
     np.save("results/" + str(name) + "_final.npy", var)
 
     N = Y.shape[0]
-    X = np.array(var[:-3]).reshape((N, 2))
+    X = np.array(var[:-3]).reshape((N, latent_dimension))
     alpha = var[-3]
     beta = var[-2]
     gamma = var[-1]
