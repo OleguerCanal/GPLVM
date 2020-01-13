@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler  # To standardize data
 from sklearn.gaussian_process import kernels
 import time
 from tqdm import tqdm
-from fake_dataset import generate_observations, plot
+# from fake_dataset import generate_observations, plot
 from datetime import datetime
 
 name = "experiemnt"

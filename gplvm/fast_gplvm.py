@@ -10,8 +10,8 @@ from sklearn.gaussian_process import kernels
 import time
 from tqdm import tqdm
 
-from fake_dataset import generate_observations, plot
-from mice_genes import load_genes_dataset, plot_genes
+# from fake_dataset import generate_observations, plot
+from exp_mice import load_genes_dataset, plot_genes
 from datetime import datetime
 from ivm import get_active_set
 
@@ -112,7 +112,7 @@ class GPLVM:
         self.X = PCA(n_components=self.latent_dim).fit_transform(Y)
         self.kernel_params = np.ones(3)  # (alpha, beta, gamma)
 
-        for _ in tqdm(range(iterations)):
+        for it in tqdm(range(iterations)):
             # active_set, _ = fake_ivm(self.X, self.active_set_size)  # TODO(oleguer): Call real ivm by federico
             active_set, _ = get_active_set(
                 K=self.__kernel(
@@ -158,7 +158,7 @@ class GPLVM:
                                options={"disp": disp})
                 self.X[j, :] = out.x
 
-            if save:
+            if save and it%10 == 0:
                 self.save()
 
         return self.X
