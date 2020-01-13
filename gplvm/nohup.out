@@ -65,3 +65,12 @@ time: 107.14305877685547
 alpha 0.9593012698701374
 beta 1.7221184586581197
 gamma 0.785036032502749
+Warning: Desired error not necessarily achieved due to precision loss.
+         Current function value: -21378.962825
+         Iterations: 251
+         Function evaluations: 115836
+         Gradient evaluations: 565
+time: 5218.243932962418
+alpha 0.18852948782546858
+beta 14.116853262695107
+gamma -1.5666208546352847

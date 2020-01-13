@@ -5,17 +5,12 @@ from PIL import Image
 import PIL.ImageOps
 from matplotlib.image import BboxImage
 from matplotlib.transforms import Bbox, TransformedBbox
-<<<<<<< HEAD
-
-def load_digit_dataset():
-=======
 import time
 from simple_gplvm import simple_gplvm
 
 np.random.seed(1)
 
 def load_digit_dataset(samples):
->>>>>>> 87d0260ace1135ba3e9f779417a587adfbe8ba15
     path = "data/digits.h5"
     import h5py
     with h5py.File(path, 'r') as hf:
@@ -26,14 +21,10 @@ def load_digit_dataset(samples):
     n_classes = 10
     N = len(X_tr)
 
-<<<<<<< HEAD
-    return N, n_classes, D, np.asarray(X_tr), np.asarray(y_tr).reshape(-1,1)
-=======
     Y = np.asarray(X_tr)
     idx = np.random.randint(Y.shape[0], size=samples)
 
     return N, n_classes, D, Y[idx, :], np.asarray(y_tr)[idx].reshape(-1,1)
->>>>>>> 87d0260ace1135ba3e9f779417a587adfbe8ba15
 
 def plot_digits(pca, dig_obs, labels=None):
     fig, ax = plt.subplots(nrows=1, ncols=1)
@@ -58,11 +49,7 @@ def plot_digits(pca, dig_obs, labels=None):
                         newData.append(item)
 
                 im.putdata(newData)
-<<<<<<< HEAD
-                im.save("img2.png", "PNG")
-=======
                 # im.save("img2.png", "PNG")
->>>>>>> 87d0260ace1135ba3e9f779417a587adfbe8ba15
                 # inverted_im.save("img.jpg")
                 bb = Bbox.from_bounds(x0,y0,0.25,0.25)  
                 bb2 = TransformedBbox(bb,ax.transData)
@@ -70,10 +57,6 @@ def plot_digits(pca, dig_obs, labels=None):
                                     norm = None,
                                     origin=None,
                                     clip_on=False)
-<<<<<<< HEAD
-
-=======
->>>>>>> 87d0260ace1135ba3e9f779417a587adfbe8ba15
                 bbox_image.set_data(im)
                 ax.add_artist(bbox_image)
 
@@ -82,24 +65,14 @@ def plot_digits(pca, dig_obs, labels=None):
         ax[0].scatter(pca[:, 0], pca[:, 1])
         ax[1].scatter(gp_vals[:, 0], gp_vals[:, 1])
     ax.grid()
-<<<<<<< HEAD
-=======
     plt.savefig("figures/digits/result_" + str(time.time()) + ".png")
->>>>>>> 87d0260ace1135ba3e9f779417a587adfbe8ba15
     plt.show()
 
 if __name__ == "__main__":
 
-<<<<<<< HEAD
-    N, n_classes, D, dig_obs, dig_lab = load_digit_dataset()
-    pca_dig = PCA(n_components=2).fit_transform(dig_obs)
-
-    plot_digits(pca_dig, dig_obs, dig_lab)
-=======
-    N, n_classes, D, dig_obs, dig_lab = load_digit_dataset(samples=200)
+    N, n_classes, D, dig_obs, dig_lab = load_digit_dataset(samples=100)
 
     pca_dig = PCA(n_components=2).fit_transform(dig_obs)
-    gp_vals = simple_gplvm(Y=dig_obs, experiment_name="digits_200")  # Compute values
+    gp_vals = simple_gplvm(Y=dig_obs, experiment_name="digits_100")  # Compute values
 
     plot_digits(gp_vals, dig_obs, dig_lab)
->>>>>>> 87d0260ace1135ba3e9f779417a587adfbe8ba15
