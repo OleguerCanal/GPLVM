@@ -21,7 +21,7 @@ def load_genes_dataset(N, D):
     n_classes = len(df.index.unique())
     return N, n_classes, D, np.asarray(df.values), df.index
 
-def plot(pca, gp_vals, labels=None):
+def plot_genes(pca, gp_vals, labels=None):
     ''' Simple scatter of 2d data in same figure
     '''
     fig, ax = plt.subplots(nrows=1, ncols=2,figsize=(8,6))
@@ -51,4 +51,4 @@ if __name__ == "__main__":
     pca = PCA(n_components=2).fit_transform(observations)
     gp_simple = simple_gplvm(Y=observations, experiment_name="mice")
     print(pca.shape)
-    plot(pca, gp_simple, labels)
+    plot_genes(pca, gp_simple, labels)
