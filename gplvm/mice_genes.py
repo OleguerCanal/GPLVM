@@ -40,11 +40,11 @@ def plot(pca, gp_vals, labels=None):
     ax[1].grid()
     ax[1].set_title("GPLVM Single-Cell qPCR data")
     fig.legend(np.unique(labels))
-    fig.savefig("results/mice_comparison_pca_gp.png")
+    fig.savefig("figures/mice/mice_comparison_pca_gp.png")
     plt.show()
 
 if __name__ == "__main__":
-    N, n_classes, D, observations, labels = load_genes_dataset(30, 10)
+    N, n_classes, D, observations, labels = load_genes_dataset(10, 10)
     print("N:", N)
     print("n_classes:", n_classes)
     print("D:", D)

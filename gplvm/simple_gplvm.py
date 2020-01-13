@@ -9,22 +9,20 @@ from sklearn.gaussian_process import kernels
 import time
 from tqdm import tqdm
 from fake_dataset import generate_observations, plot
-
-np.random.seed(0)
+from datetime import datetime
 
 name = "experiemnt"
+iteration = 0
+
 
 def kernel(X, Y, alpha, beta, gamma):
     kernel = kernels.RBF(length_scale=(1./gamma**2))
     return np.matrix(alpha*kernel(X, Y) + np.eye(X.shape[0])/(beta**2))
 
-# def kernel_test(x, y, alpha, beta, gamma):
-#     return alpha*np.exp(-gamma*np.dot(x-y, x-y)/2) + 1./beta
-
 def likelihood(var, *args):
-    YYT, N, D, = args
+    YYT, N, D, latent_dimension, = args
 
-    X = np.array(var[:-3]).reshape((N, 2))
+    X = np.array(var[:-3]).reshape((N, latent_dimension))
     alpha = var[-3]
     beta = var[-2]
     gamma = var[-1]
@@ -35,7 +33,11 @@ def likelihood(var, *args):
     return D*np.log(np.abs(np.linalg.det(K)))/2 + trace/2
 
 def save_vars(var):
-    np.save("results/" + str(name) + ".npy", var)
+    global iteration
+    iteration += 1
+    if iteration%10 == 0:
+        timestamp = str(datetime.now()).replace(" ", "_")
+        np.save("results/" + str(name) + "_" + timestamp + ".npy", var)
 
 def simple_gplvm(Y, experiment_name="experiment", latent_dimension=2):
     ''' Implementation of GPLVM algorithm, returns data in latent space
@@ -43,7 +45,7 @@ def simple_gplvm(Y, experiment_name="experiment", latent_dimension=2):
     global name
     name = experiment_name
     Y = np.matrix(Y)
-    # TODO(oleguer): SGould we center observations?
+    # TODO(oleguer): Should we center observations?
     
     # Initialize X through PCA
  
@@ -58,7 +60,7 @@ def simple_gplvm(Y, experiment_name="experiment", latent_dimension=2):
 
     # Optimization
     t1 = time.time()
-    var = fmin_cg(likelihood, var, args=tuple((YYT,N,D,)), epsilon = 0.001, disp=True, callback=save_vars)
+    var = fmin_cg(likelihood, var, args=tuple((YYT,N,D,latent_dimension,)), epsilon = 0.001, disp=True, callback=save_vars)
     print("time:", time.time() - t1)
 
     var = list(var)
@@ -66,7 +68,7 @@ def simple_gplvm(Y, experiment_name="experiment", latent_dimension=2):
     np.save("results/" + str(name) + "_final.npy", var)
 
     N = Y.shape[0]
-    X = np.array(var[:-3]).reshape((N, 2))
+    X = np.array(var[:-3]).reshape((N, latent_dimension))
     alpha = var[-3]
     beta = var[-2]
     gamma = var[-1]
