@@ -11,6 +11,7 @@ from tqdm import tqdm
 from fake_dataset import generate_observations, plot
 from mice_genes import load_genes_dataset, plot_genes
 from datetime import datetime
+from ivm import get_active_set
 
 np.random.seed(0)
 
@@ -44,12 +45,6 @@ class GPLVM:
         kernel = kernels.RBF(length_scale=(1./gamma**2))
         return np.matrix(alpha*kernel(X, Y) + np.eye(X.shape[0])*beta**2)
 
-    def __kernel_point(self, x, y, alpha, beta, gamma):
-        a = x - y
-        if np.array_equal(x, y):
-            return alpha*np.exp(-gamma*np.dot(a, a.T).item()/2) + beta**2
-        return alpha*np.exp(-gamma*np.dot(a, a.T).item()/2)
-
     def __kernel_param_loglike(self, params, *args):
         ''' Kernel Optimization: Equation (4) of the paper
         '''
@@ -74,7 +69,7 @@ class GPLVM:
 
         dkdalpha = (Kii - np.eye(self.active_set_size)*(beta**2))/alpha
         dkdbeta = 2*beta*np.eye(self.active_set_size)
-        dkdgamma = alpha*dkdalpha*np.log(Kii)/gamma
+        dkdgamma = alpha*dkdalpha*np.log(dkdalpha)/gamma
 
         a = np.sum(inner1d(dkdl, dkdalpha))  # Fast product and trace computation
         b = np.sum(inner1d(dkdl, dkdbeta))
@@ -104,10 +99,14 @@ class GPLVM:
         self.Y = Y
 
         self.X = PCA(n_components=self.latent_dim).fit_transform(Y)
-        kernel_params = np.ones(3)  # (alpha, beta, gamma)
+        self.kernel_params = np.ones(3)  # (alpha, beta, gamma)
 
         for _ in tqdm(range(iterations)):
-            active_set, _ = fake_ivm(self.X, self.active_set_size)  # TODO(oleguer): Call real ivm by federico
+            # active_set, _ = fake_ivm(self.X, self.active_set_size)  # TODO(oleguer): Call real ivm by federico
+            active_set, _ = get_active_set(
+                K = self.__kernel(self.X, self.X, alpha=self.kernel_params[0], beta=0, gamma=self.kernel_params[2]),
+                noise_model_var = self.kernel_params[1],
+                size=self.active_set_size)
             Xi = np.matrix(self.X[active_set, :])
             Yi = np.matrix(self.Y[active_set, :])
             YiYiT = Yi*Yi.T  # Precompute this product
@@ -116,7 +115,7 @@ class GPLVM:
             # self.timer.tic()
             out = minimize( fun = self.__kernel_param_loglike, 
                             # jac=self.__kernel_param_loglike_dif,  # TODO(oleguer) Fix differential form!!!
-                            x0 = kernel_params,
+                            x0 = self.kernel_params,
                             args = tuple((Xi, YiYiT)),
                             options = {"disp" : disp})
             # self.timer.toc("First optimization")
@@ -126,11 +125,15 @@ class GPLVM:
             except:
                 pass
 
-            self.active_set, inactive_set = fake_ivm(self.X, self.active_set_size)  # TODO(oleguer): Call real ivm by federico
+            # self.active_set, inactive_set = fake_ivm(self.X, self.active_set_size)  # TODO(oleguer): Call real ivm by federico
+            self.active_set, inactive_set = get_active_set(
+                K = self.__kernel(self.X, self.X, alpha=self.kernel_params[0], beta=0, gamma=self.kernel_params[2]),
+                noise_model_var = self.kernel_params[1],
+                size=self.active_set_size)
             Xi = np.matrix(self.X[self.active_set, :])
             Yi = np.matrix(self.Y[self.active_set, :])
             Kii = self.__kernel(Xi, Xi, alpha=self.kernel_params[0], beta=self.kernel_params[1], gamma=self.kernel_params[2])
-            K = self.__kernel(self.X, self.X, alpha=self.kernel_params[0], beta=self.kernel_params[1], gamma=kernel_params[2])
+            K = self.__kernel(self.X, self.X, alpha=self.kernel_params[0], beta=self.kernel_params[1], gamma=self.kernel_params[2])
 
             self.Kii_inv = Kii.I
             self.YTKII_inv = Yi.T*self.Kii_inv
@@ -147,11 +150,11 @@ class GPLVM:
         return self.X
 
 if __name__ == "__main__":
-    N, n_classes, D, observations, labels = load_genes_dataset(100, 20)
+    N, n_classes, D, observations, labels = load_genes_dataset(100, 30)
     print("N", N)
     print("D", D)
     print("n_classes", n_classes)
-    gp_vals = GPLVM(active_set_size = 15).fit_transform(observations, iterations = 3)
+    gp_vals = GPLVM(active_set_size = 20).fit_transform(observations, iterations = 10)
     # print(gp_vals)
     pca = PCA(n_components=2).fit_transform(observations)
 
