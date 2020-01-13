@@ -9,8 +9,11 @@ from sklearn.gaussian_process import kernels
 import time
 from tqdm import tqdm
 from fake_dataset import generate_observations, plot
+from datetime import datetime
 
 name = "experiemnt"
+iteration = 0
+
 
 def kernel(X, Y, alpha, beta, gamma):
     kernel = kernels.RBF(length_scale=(1./gamma**2))
@@ -30,7 +33,11 @@ def likelihood(var, *args):
     return D*np.log(np.abs(np.linalg.det(K)))/2 + trace/2
 
 def save_vars(var):
-    np.save("results/" + str(name) + ".npy", var)
+    global iteration
+    iteration += 1
+    if iteration%10 == 0:
+        timestamp = str(datetime.now()).replace(" ", "_")
+        np.save("results/" + str(name) + "_" + timestamp + ".npy", var)
 
 def simple_gplvm(Y, experiment_name="experiment", latent_dimension=2):
     ''' Implementation of GPLVM algorithm, returns data in latent space

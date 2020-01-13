@@ -10,7 +10,7 @@ import time
 from tqdm import tqdm
 from fake_dataset import generate_observations, plot
 from mice_genes import load_genes_dataset
-
+from datetime import datetime
 
 np.random.seed(0)
 
