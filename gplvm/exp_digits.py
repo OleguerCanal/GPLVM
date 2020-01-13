@@ -70,11 +70,23 @@ def plot_digits(pca, dig_obs, labels=None, name = ""):
     plt.show()
 
 if __name__ == "__main__":
-    N, n_classes, D, dig_obs, dig_lab = load_digit_dataset(samples=300)
+    N, n_classes, D, dig_obs, dig_lab = load_digit_dataset(samples=500)
 
+    # PCA
     pca_dig = PCA(n_components=2).fit_transform(dig_obs)
-    gp_vals = GPLVM(active_set_size = 30).fit_transform(dig_obs, iterations = 5)
-    # gp_vals = simple_gplvm(Y=dig_obs, experiment_name="digits_200")  # Compute values
-
     plot_digits(pca_dig, dig_obs, dig_lab, name = "pca")
-    plot_digits(gp_vals, dig_obs, dig_lab, name = "gplvm")
+
+    # GPLVM experiment:
+    for active_set_size in [20, 50, 100]:
+        name = "digits_size_" + str(active_set_size) + "_exp"
+        gplvm = GPLVM(active_set_size=active_set_size, name=name)
+        gp_vals = gplvm.fit_transform(dig_obs, iterations=300, save = True)    
+        plot_digits(gp_vals, dig_obs, dig_lab, name=name)
+
+    # Load saved experiment example:
+    # gplvm = GPLVM(active_set_size=30, name="digits_exp")
+    # gplvm.load("results/digits_exp_2020-01-13_23:17:32.735412")
+    # gp_vals = gplvm.X
+    # plot_digits(gp_vals, dig_obs, dig_lab, name = "gplvm")
+
+
