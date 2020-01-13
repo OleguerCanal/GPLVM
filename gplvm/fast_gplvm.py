@@ -199,7 +199,7 @@ if __name__ == "__main__":
     gplvm = GPLVM(active_set_size=20)
     # gplvm.load("results/gplvm_class_2020-01-13_19:57:38.201853")  # How to load previous state
     # gp_vals = gplvm.X
-    gp_vals = gplvm.fit_transform(observations, iterations=5, save = True)
+    gp_vals = gplvm.fit_transform(observations, iterations=5, save=True)
 
     # Precision
     precision = gplvm.get_precision([0.5, 0.3])

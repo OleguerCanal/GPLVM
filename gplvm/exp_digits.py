@@ -25,7 +25,7 @@ def load_digit_dataset(samples):
     Y = np.asarray(X_tr)
     idx = np.random.randint(Y.shape[0], size=samples)
 
-    return N, n_classes, D, Y[idx, :], np.asarray(y_tr)[idx].reshape(-1,1)
+    return Y.shape[0], n_classes, D, Y[idx, :], np.asarray(y_tr)[idx].reshape(-1,1)
 
 def plot_digits(pca, dig_obs, labels=None, name = ""):
     fig, ax = plt.subplots(nrows=1, ncols=1)
