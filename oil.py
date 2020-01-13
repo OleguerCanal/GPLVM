@@ -4,6 +4,7 @@ from matplotlib import collections
 from sklearn.decomposition import PCA, KernelPCA  # For X initialization
 import pandas as pd
 from simple_gplvm import simple_gplvm
+from fast_gplvm import GPLVM
 
 
 def load_oil_dataset():
@@ -20,9 +21,7 @@ def load_oil_dataset():
             _, t = p.split(":")
             observations[j][i] = t
         j += 1
-    return len(observations), 3, 12, np.asarray(observations), np.asarray(labels)
-
-        
+    return len(observations), 3, 12, np.asarray(observations), np.asarray(labels) 
 
 
 def z(x,y):
@@ -59,12 +58,15 @@ def plot(pca, gp_vals, labels=None):
 if __name__ == "__main__":
 
     N, n_classes, D, observations, labels =load_oil_dataset()
+    gplvm = GPLVM(active_set_size=20)
+    
+    gp_vals = gplvm.fit_transform(observations,iterations=5,save=False)
 
     # N, n_classes, D, observations, labels= load_genes_dataset()
-    a = np.linspace(0,999,2000, dtype=np.int16)
-    pca = PCA(n_components=2).fit_transform(observations[a,:])
-    gp_simple = simple_gplvm(Y=observations[a,:])
+    # a = np.linspace(0,999,2000, dtype=np.int16)
+    pca = PCA(n_components=2).fit_transform(observations)
+    # gp_simple = simple_gplvm(Y=observations[a,:])
     # print(pca.shape)
     # plot_genes(pca, observations[a,0:10], labels[a])
     # plot_genes(gp_simple, observations[a,0:10], labels[a])
-    plot(pca, gp_simple, labels[a])
+    plot(pca, gp_vals, labels[a])
