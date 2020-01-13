@@ -1,4 +1,14 @@
 import numpy as np
+from fake_dataset import generate_observations
+from sklearn.decomposition import PCA  # For X initialization
+from sklearn.gaussian_process import kernels
+
+def kernel(X, Y, alpha, beta, gamma, noise=True):
+    kernel = kernels.RBF(length_scale=(1./gamma**2))
+    K = np.matrix(alpha*kernel(X, Y))
+    if noise:
+        K += np.eye(X.shape[0])/beta**2
+    return K
 
 def get_active_set(K, noise_model_var, size):
     n_points = K.shape[0]
@@ -32,6 +42,14 @@ def get_active_set(K, noise_model_var, size):
 
 
 if __name__ == "__main__":
-    I, J = get_active_set(np.identity(10), 0.1, size=4)
+    N = 1000  # Number of observations
+    n_classes = 4  # Number of classes
+    D = 15  # Y dimension (observations)
+
+    observations, labels = generate_observations(N, D, n_classes)
+    observations = observations - np.mean(observations, axis=0)
+    X = PCA(n_components=2).fit_transform(observations)
+    K = kernel(X, X, 1, 1, 1, False)
+    I, J = get_active_set(K, 1, 20)
     print(I)
     print(J)
