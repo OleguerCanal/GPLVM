@@ -149,13 +149,29 @@ class GPLVM:
 
         return self.X
 
+    def get_precision(self, x):  # TODO(oleguer): Review this, I think always returns 0 (good thing?)
+        ''' returns latent space precision at point x = [x1, x2] (or any number of dimensions)
+        '''
+        X = np.array(list(self.X) + [x])
+        K = self.__kernel(X, X, alpha=self.kernel_params[0], beta=self.kernel_params[1], gamma=self.kernel_params[2])
+        k_xx = K[0, 0]
+        K_Ij = K[:, -1]
+        K_inv = K.I
+        sigma_sq = k_xx - (K_Ij.T*K_inv*K_Ij).item()
+        return sigma_sq        
+
+
 if __name__ == "__main__":
-    N, n_classes, D, observations, labels = load_genes_dataset(200, 30)
+    N, n_classes, D, observations, labels = load_genes_dataset(100, 10)
     print("N", N)
     print("D", D)
     print("n_classes", n_classes)
-    gp_vals = GPLVM(active_set_size = 20).fit_transform(observations, iterations = 10)
-    # print(gp_vals)
     pca = PCA(n_components=2).fit_transform(observations)
+    gplvm = GPLVM(active_set_size = 20)
+    gp_vals = gplvm.fit_transform(observations, iterations = 5)
+
+    # Precision
+    precision = gplvm.get_precision([0.5, 0.3])
+    print(precision)
 
     plot_genes(pca, gp_vals, labels)
