@@ -7,28 +7,17 @@ from matplotlib import pyplot as plt
 from sklearn.metrics import confusion_matrix
 from exp_digits import load_digit_dataset
 from exp_mice import load_genes_dataset
+from exp_oil import load_oil_dataset
 
 class Evaluation:
 
-    def __init__(self, observations, labels):
-        self.observations = observations
+    def __init__(self, pca_data, gplvm_data, labels):
         self.labels = labels
-        self.N = observations.shape[0]
+        self.N = pca_data.shape[0]
         self.unique_labels = np.unique(labels)
         self.n_classes = len(self.unique_labels)
-        self.gp_vals = None
-        self.pca_vals = None
-
-    def load_gplvm(self, filename, active_set_size=100):
-        gplvm = GPLVM(active_set_size=active_set_size)
-        gplvm.load(filename)
-        self.gp_vals = gplvm.X
-
-    def compute(self, active_set_size=100, iterations=10):
-        if self.gp_vals is None:
-            self.gp_vals = GPLVM(active_set_size=active_set_size).fit_transform(observations,
-                                                                                iterations=iterations)
-        self.pca_vals = PCA(n_components=2).fit_transform(observations)
+        self.gp_vals = gplvm_data
+        self.pca_vals = pca_data
 
     def cluster(self, algorithm):
         # Valid algorithms are 'kmeans' and 'gmm'
@@ -58,7 +47,8 @@ class Evaluation:
             scores = np.zeros(self.n_classes)
             for i, label in enumerate(self.unique_labels):
                 scores[i] = np.sum(np.where((assigned_labels == k) * (true_lables == label), 1, 0))
-            scores /= total
+            if total != 0:
+                scores /= total 
             cluster_assignments[k] = np.argmax(scores)
         return cluster_assignments
 
@@ -76,9 +66,10 @@ class Evaluation:
         for n, cm in enumerate([gp_confusion_matrix, pca_confusion_matrix]):
             precisions = np.zeros(self.n_classes)
             recalls = np.zeros(self.n_classes)
-            for i in range(self.n_classes):
-                precisions[i] = cm[i, i] / np.sum(cm[:, i]) if np.sum(cm[:, i]) != 0 else 0
-                recalls[i] = cm[i, i] / np.sum(cm[i, :]) if np.sum(cm[i, :]) != 0 else 0
+            for i, label in enumerate(self.unique_labels):
+                weight = np.sum(np.where(self.labels == label, 1, 0)) / self.labels.shape[0]
+                precisions[i] = cm[i, i] * weight / np.sum(cm[:, i]) if np.sum(cm[:, i]) != 0 else 0
+                recalls[i] = cm[i, i] * weight / np.sum(cm[i, :]) if np.sum(cm[i, :]) != 0 else 0
             avg_precision = np.mean(precisions)
             avg_recall = np.mean(recalls)
             metrics_dict[names[n]] = {'avg_precision': avg_precision, 'avg_recall': avg_recall}
@@ -103,12 +94,12 @@ class Evaluation:
             indices = np.array(self.pca_assignments == k)
             pca_k_points = self.pca_vals[indices]
             axes[0, 1].scatter(pca_k_points[:,0], pca_k_points[:,1], c=colors[k])
-            axes[0, 1].set_title('K means reconstruction')
+            axes[0, 1].set_title('Clustering reconstruction')
 
             indices = np.array(self.gp_assignments == k)
             gplvm_k_points = self.gp_vals[indices]
             axes[1, 1].scatter(gplvm_k_points[:,0], gplvm_k_points[:,1], c=colors[k])
-            axes[1, 1].set_title('K means reconstruction') 
+            axes[1, 1].set_title('Clustering reconstruction') 
         plt.show()
 
     def plot_confusion_matrix():
@@ -124,18 +115,32 @@ class Evaluation:
         plt.show()
  
 if __name__ == "__main__":
-    N, n_classes, D, observations, labels = load_digit_dataset(500)
-    #N, n_classes, D, observations, labels = load_genes_dataset(430, 48)
-    print('Number observations: ', observations.shape[0])
-    print('Number dimensions: ', D)
-    labels = np.array(labels).reshape(observations.shape[0])
-    observations = observations - np.mean(observations, axis=0)
-    #observations = (observations - observations.min(0)) / observations.ptp(0)
+    np.random.seed(1)
 
+    #N, n_classes, D, observations, labels = load_digit_dataset(500)
+    #N, n_classes, D, observations, labels = load_genes_dataset(437, 48)
+    #N, n_classes, D, observations, labels = load_oil_dataset(samples=200)
+    #print('Number observations: ', observations.shape[0])
+    #print('Number dimensions: ', D)
 
-    evaluation = Evaluation(observations, labels)
-    evaluation.load_gplvm('/home/fedetask/Desktop/digits_250_results/digits_size_250_exp_2020-01-14_15:18:00.651877')
-    evaluation.compute()
+    faces_dict_pca = np.load('/home/fedetask/Desktop/Faces results-20200114T181752Z-001/Faces results/results_kernel_pca_poly.npy', allow_pickle=True).item()
+    labels = faces_dict_pca['labels']
+    pca_data = faces_dict_pca['data']
+
+    faces_dict_gplvm = np.load('/home/fedetask/Desktop/Faces results-20200114T181752Z-001/Faces results/results_gplvm.npy', allow_pickle=True).item()
+    gplvm_data = faces_dict_gplvm['data']
+    
+    #labels = np.array(labels).reshape(observations.shape[0])
+
+    #pca_data = PCA(n_components=2).fit_transform(observations)
+    #gplvm = GPLVM(active_set_size=None)
+    #gplvm.load('/home/fedetask/Desktop/digits_250_results/digits_size_250_exp_2020-01-14_15:18:00.651877')
+    #gplvm_data = np.load('/home/fedetask/Downloads/mice_full_dataset_final.npy')[:-3].reshape((437,2))
+    evaluation = Evaluation(pca_data, gplvm_data, labels)
+    #evaluation.load_gplvm('/home/fedetask/Downloads/oil_size_175_exp_2020-01-14_12_59_50.041882')
+    #evaluation.gp_vals = np.load('/home/fedetask/Downloads/mice_full_dataset_final.npy')[-3:].reshape((437,2))
+    #evaluation.load_gplvm('/home/fedetask/Desktop/digits_250_results/digits_size_250_exp_2020-01-14_15:18:00.651877')
+    #evaluation.compute()
     evaluation.cluster(algorithm='gmm')
     evaluation.plot()
 
