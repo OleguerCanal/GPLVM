@@ -46,6 +46,7 @@ class GPLVM:
         self.latent_dim = latent_dim
         self.timer = Timer()
         self.name = name
+        self.epsilon = 1e-10
 
     def __kernel(self, X, Y, alpha, beta, gamma):
         kernel = kernels.RBF(length_scale=(1./gamma**2))
@@ -59,7 +60,7 @@ class GPLVM:
             Xi, Xi, alpha=params[0], beta=params[1], gamma=params[2])
         Kii_inv = Kii.I
         neg_loglike = self.D * \
-            np.log(np.abs(np.linalg.det(Kii))) + \
+            np.log(np.abs(np.linalg.det(Kii))+self.epsilon) + \
             np.sum(inner1d(Kii_inv, YiYiT))
         return neg_loglike/2
 
@@ -78,7 +79,7 @@ class GPLVM:
 
         dkdalpha = (Kii - np.eye(self.active_set_size)*(beta**2))/alpha
         dkdbeta = 2*beta*np.eye(self.active_set_size)
-        dkdgamma = alpha*dkdalpha*np.log(dkdalpha)/gamma
+        dkdgamma = alpha*dkdalpha*np.log(dkdalpha + self.epsilon)/gamma
 
         # Fast product and trace computation
         a = np.sum(inner1d(dkdl, dkdalpha))
@@ -99,7 +100,7 @@ class GPLVM:
         sigma_sq = self.k_xx - (K_Ij.T*self.Kii_inv*K_Ij).item()
         yj = self.Y[j, :]
         sub = yj.reshape(mu.shape) - mu
-        return np.log(np.abs(sigma_sq))/2 + np.dot(sub.T, sub).item()/(2*sigma_sq)
+        return np.log(np.abs(sigma_sq)+self.epsilon)/2 + np.dot(sub.T, sub).item()/(2*sigma_sq)
 
     def fit_transform(self, Y, iterations, disp=False, save=False, call_back=None):
         ''' Implementation of GPLVM algorithm, returns data in latent space

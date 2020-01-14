@@ -70,17 +70,17 @@ def plot_digits(pca, dig_obs, labels=None, name = ""):
     plt.show()
 
 if __name__ == "__main__":
-    N, n_classes, D, dig_obs, dig_lab = load_digit_dataset(samples=500)
+    N, n_classes, D, dig_obs, dig_lab = load_digit_dataset(samples=1000)
 
     # PCA
     pca_dig = PCA(n_components=2).fit_transform(dig_obs)
     plot_digits(pca_dig, dig_obs, dig_lab, name = "pca")
 
     # GPLVM experiment:
-    for active_set_size in [20, 50, 100]:
-        name = "digits_size_" + str(active_set_size) + "_exp"
+    for active_set_size in [200, 500]:
+        name = "digits_size_" + str(active_set_size) + "_exp_300_samples_"
         gplvm = GPLVM(active_set_size=active_set_size, name=name)
-        gp_vals = gplvm.fit_transform(dig_obs, iterations=300, save = True)    
+        gp_vals = gplvm.fit_transform(dig_obs, iterations=200, save = True)    
         plot_digits(gp_vals, dig_obs, dig_lab, name=name)
 
     # Load saved experiment example:

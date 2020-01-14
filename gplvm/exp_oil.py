@@ -7,7 +7,7 @@ from simple_gplvm import simple_gplvm
 from fast_gplvm import GPLVM
 import time
 
-np.random.seed(2)
+np.random.seed(1)
 
 def load_oil_dataset(samples):
     path = 'data/oil.txt'
@@ -63,11 +63,14 @@ def plot(pca, gp_vals, labels=None, name=""):
 if __name__ == "__main__":
     N, n_classes, D, observations, labels = load_oil_dataset(samples=200)
 
+    # Simple
+    # gp_vals = simple_gplvm(Y=observations, experiment_name="simple_oil")  # Compute values
+    # pca = PCA(n_components=2).fit_transform(observations)
+    # plot(pca, gp_vals, labels, name="simple_oil")
 
-    for active_set_size in [10, 20, 50, 75, 100]:
+    # Fast
+    for active_set_size in [175, 200]:
         name = "oil_size_" + str(active_set_size) + "_exp"
         gplvm = GPLVM(active_set_size=active_set_size, name=name)
-        gp_vals = gplvm.fit_transform(observations, iterations=100, save=True)
-        pca = PCA(n_components=2).fit_transform(observations)
-
-        plot(pca, gp_vals, labels, name=name)
+        gp_vals = gplvm.fit_transform(observations, iterations=300, save=True)
+        pca = PCA(n_compone100, E
