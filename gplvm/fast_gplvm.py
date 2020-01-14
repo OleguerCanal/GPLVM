@@ -99,9 +99,9 @@ class GPLVM:
         sigma_sq = self.k_xx - (K_Ij.T*self.Kii_inv*K_Ij).item()
         yj = self.Y[j, :]
         sub = yj.reshape(mu.shape) - mu
-        return np.log(sigma_sq)/2 + np.dot(sub.T, sub).item()/(2*sigma_sq)
+        return np.log(np.abs(sigma_sq))/2 + np.dot(sub.T, sub).item()/(2*sigma_sq)
 
-    def fit_transform(self, Y, iterations, disp=False, save=False):
+    def fit_transform(self, Y, iterations, disp=False, save=False, call_back=None):
         ''' Implementation of GPLVM algorithm, returns data in latent space
         '''
         # x = StandardScaler().fit_transform(x)  # TODO(oleguer): Standardize data??
@@ -160,6 +160,8 @@ class GPLVM:
 
             if save and it%10 == 0:
                 self.save()
+                # if call_back is not None:
+
 
         return self.X
 
@@ -199,7 +201,7 @@ if __name__ == "__main__":
     gplvm = GPLVM(active_set_size=20)
     # gplvm.load("results/gplvm_class_2020-01-13_19:57:38.201853")  # How to load previous state
     # gp_vals = gplvm.X
-    gp_vals = gplvm.fit_transform(observations, iterations=5, save = True)
+    gp_vals = gplvm.fit_transform(observations, iterations=5, save=True)
 
     # Precision
     precision = gplvm.get_precision([0.5, 0.3])
