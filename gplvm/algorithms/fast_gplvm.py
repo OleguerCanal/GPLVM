@@ -1,3 +1,4 @@
+from datetime import datetime
 import _pickle as cPickle
 from matplotlib import pyplot as plt
 import numpy as np
@@ -10,10 +11,10 @@ from sklearn.gaussian_process import kernels
 import time
 from tqdm import tqdm
 
-# from fake_dataset import generate_observations, plot
-from exp_mice import load_genes_dataset, plot_genes
-from datetime import datetime
 from ivm import get_active_set
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+from exp_mice import load_genes_dataset, plot_genes
+
 
 np.random.seed(0)
 

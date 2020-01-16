@@ -3,8 +3,8 @@ from matplotlib import pyplot as plt
 from matplotlib import collections
 from sklearn.decomposition import PCA, KernelPCA  # For X initialization
 import pandas as pd
-from simple_gplvm import simple_gplvm
-from fast_gplvm import GPLVM
+from algorithms.simple_gplvm import simple_gplvm
+from algorithms.fast_gplvm import GPLVM
 import time
 
 np.random.seed(1)

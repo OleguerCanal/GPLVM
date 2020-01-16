@@ -6,8 +6,8 @@ import PIL.ImageOps
 from matplotlib.image import BboxImage
 from matplotlib.transforms import Bbox, TransformedBbox
 import time
-from simple_gplvm import simple_gplvm
-from fast_gplvm import GPLVM
+from algorithms.simple_gplvm import simple_gplvm
+from algorithms.fast_gplvm import GPLVM
 
 np.random.seed(1)
 

@@ -7,7 +7,7 @@ import PIL.ImageOps
 from matplotlib.image import BboxImage
 from matplotlib.transforms import Bbox, TransformedBbox
 import pandas as pd
-from simple_gplvm import simple_gplvm
+from algorithms.simple_gplvm import simple_gplvm
 
 def load_genes_dataset(N, D):
     # URL = "https://raw.githubusercontent.com/sods/ods/master/datasets/guo_qpcr.csv"
