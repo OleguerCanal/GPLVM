@@ -1,4 +1,4 @@
-# KTH Adv Machine Learning Course Final Project DD2434 2019
+# KTH Advanced Machine Learning Final Project DD2434 2019
 
 ## Abstract
 
@@ -11,9 +11,27 @@ The original formulation of the Gaussian Process Latent Variable Model (GPLVM) c
 ## Results
 
 ### High-dimensional data visualization and clustering
-Projection of 48-dimensional features into a 2 dimensional latent space of a subset of mice gene dataset with real classes (left) and their corresponding GMM clustering (right). Notice how clustering in GPLVM projection outperforms the one provided by PCA:
+Projection of 48-dimensional features into a 2 dimensional latent space of a subset of mice gene dataset with real classes (left) and their corresponding GMM clustering (right). Notice how clustering in GPLVM projection greatly outperforms the one provided by PCA:
 
 ![Mice Gene](/scripts/figures/mice/plot.png)
+
+### Video frames re-ordering
+
+Given a set of unordered video frames, reordering can be achieved by their projection into a 1-dimensional latent space. Once again, GPLVM noticebly outperforms results yielded by simple PCA.
+
+Input sequence (read from top to bottom, left to right):
+
+![Input](/scripts/figures/video/input.png)
+
+PCA reconstruction:
+
+![Input](/scripts/figures/video/result_pca.png)
+
+GPLVM reconstruction:
+
+![Input](/scripts/figures/video/result_gplvm.png)
+
+Further experiments and quantitative analysis of the results can be found [here](/report.pdf)
 
 ## References
 
