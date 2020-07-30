@@ -1,4 +1,4 @@
-# KTH Advanced Machine Learning Final Project DD2434 2019
+# GPLVM
 
 ## Abstract
 
@@ -41,3 +41,6 @@ Further experiments and quantitative analysis of the results can be found [here]
 
 [3] Michael E Tipping and Christopher M Bishop. Probabilistic principal component analysis. Journal of the
 Royal Statistical Society: Series B (Statistical Methodology), 61(3):611–622, 1999.
+
+
+__Note__: This work was done as part of KTH Advanced Machine Learning Final Project DD2434 2019
