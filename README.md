@@ -1,4 +1,4 @@
-# GPLVM
+# GPLVM: Gaussian Process Latent Variable Model
 
 ## Abstract
 
